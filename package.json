@@ -1,6 +1,6 @@
 {
   "name": "easy-tts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Lightweight TTS library for browsers.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -22,5 +22,9 @@
     "ts-node": "^10.9.2",
     "tsup": "^8.1.0",
     "typescript": "^5.4.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZejusJS/easy-tts"
   }
 }

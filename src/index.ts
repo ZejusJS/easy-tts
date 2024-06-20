@@ -1,4 +1,5 @@
 export const GoogleVoiceName = "Google Voice" as const;
+export const AudioElementId = "easy-tts-audio" as const;
 
 // region:    --- Main speak
 
@@ -20,7 +21,16 @@ export interface ISpeak {
    *
    * For Google TTS, set "Google Voice" as voiceName.
    */
-  voiceName: string | undefined;
+  voiceName?: string;
+  /**
+   * Stops current speech and starts a new one.
+   *
+   * Google TTS ( {voiceName: "Google Voice"} ) is
+   * always cancelled
+   *
+   * @default true
+   */
+  stopCurrentSpeech?: boolean;
 }
 
 /**
@@ -37,7 +47,7 @@ export interface ISpeak {
  *
  */
 export function speak(opts: ISpeak) {
-  const { text, lng, volume, voiceName } = opts;
+  const { text, lng, volume, voiceName, stopCurrentSpeech } = opts;
 
   if (!volume || volume > 100 || volume < 0) return;
 
@@ -46,7 +56,13 @@ export function speak(opts: ISpeak) {
   const selectedVoice = voices.find((v) => v.name === voiceName);
 
   if ((selectedVoice || voices[0]) && voiceName !== GoogleVoiceName) {
-    speakSpeechSynthesisUtterance({ text, volume, voices, selectedVoice });
+    speakSpeechSynthesisUtterance({
+      text,
+      volume,
+      voices,
+      selectedVoice,
+      stopCurrentSpeech,
+    });
   } else {
     speakGoogleTTS({ text, lng, volume });
   }
@@ -60,10 +76,15 @@ export interface ISpeakSynthesis {
   volume: number;
   voices: SpeechSynthesisVoice[];
   selectedVoice?: SpeechSynthesisVoice;
+  stopCurrentSpeech?: boolean;
 }
 
 export function speakSpeechSynthesisUtterance(opts: ISpeakSynthesis) {
-  const { text, voices, volume, selectedVoice } = opts;
+  const { text, voices, volume, selectedVoice, stopCurrentSpeech } = opts;
+
+  if (stopCurrentSpeech) {
+    window.speechSynthesis.cancel();
+  }
 
   const utterance = new SpeechSynthesisUtterance(text);
 
@@ -126,16 +147,26 @@ export interface IGoogleTTS {
 export function speakGoogleTTS(opts: IGoogleTTS) {
   const { lng, text, volume } = opts;
 
-  const audioEl = document.getElementById("tts-audio") as HTMLAudioElement;
+  let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
+
+  if (!audioEl) {
+    const newAudioEl = document.createElement("audio");
+    newAudioEl.style.display = "hidden";
+    newAudioEl.ariaHidden = "true";
+    newAudioEl.id = AudioElementId;
+    document.body.appendChild(newAudioEl);
+
+    audioEl = newAudioEl;
+  }
 
   const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lng}&client=tw-ob&q="${text}"`;
 
-  if (audioEl) {
-    audioEl.src = url;
-    audioEl.volume = volume / 100;
+  audioEl.pause();
 
-    audioEl.play();
-  }
+  audioEl.src = url;
+  audioEl.volume = volume / 100;
+
+  audioEl.play();
 }
 
 // endregion: --- Google TTS

@@ -1,4 +1,4 @@
-# easy-tts
+# easy-tts (not ready yet)
 
 This package is meant to lighten the work around TTS in browsers. It's compatible for every browser because it calls Google Translate API as backup speech.
 
@@ -18,7 +18,7 @@ speak({
 });
 ```
 
-### For Google TTS
+### Google TTS
 
 ```ts
 import { speak, listWords } from "easy-tts"
@@ -47,8 +47,9 @@ checkSpeechSynthesisCompatibility("en")
 
 ## TODOS
 
-- [ ] TODO: Provide example of user's choice of TTS voice
-- [ ] TODO: Fn stop
-- [ ] TODO: Fn pause
-- [ ] TODO: Fn resume
-- [ ] TODO: Pitch option
+- [x] Appending hidden audio element
+- [ ] Provide example of user's choice of TTS voice
+- [ ] Fn stop
+- [ ] Fn pause
+- [ ] Fn resume
+- [ ] Pitch option

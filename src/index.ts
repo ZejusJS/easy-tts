@@ -151,7 +151,7 @@ export function speakGoogleTTS(opts: IGoogleTTS) {
 
   if (!audioEl) {
     const newAudioEl = document.createElement("audio");
-    newAudioEl.style.display = "hidden";
+    newAudioEl.style.display = "none";
     newAudioEl.ariaHidden = "true";
     newAudioEl.id = AudioElementId;
     document.body.appendChild(newAudioEl);

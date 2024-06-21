@@ -57,14 +57,30 @@ export interface ISpeak {
   pitch?: number;
   /**
    * Speed of voice
-   * 
-   * Works only for Speech Synthesis API (not for "Google Voice").
+   *
+   * For "Google Voice" as voiceName, it's recommended
+   * to use a value of 0.6 as a minimum and 5 as maximum. You can
+   * force any minimum for "Google Voice" by setting forceGoogleMinRate.
    *
    * Ranges between 0.1 and 10.
    *
    * @default 1
    */
   rate?: number;
+  /**
+   * Sets the minimum posible rate for "Google Voice"
+   * as voiceName. It's recommended to set 0.6.
+   *
+   * Ranges between 0.1 and 10.
+   */
+  forceGoogleMinRate?: number;
+  /**
+   * Sets the maximum posible rate for "Google Voice"
+   * as voiceName. It's recommended to set 6.
+   *
+   * Ranges between 0.1 and 10.
+   */
+  forceGoogleMaxRate?: number;
 }
 
 /**
@@ -81,7 +97,17 @@ export interface ISpeak {
  *
  */
 export function speak(opts: ISpeak) {
-  let { text, lng, volume, voiceName, stopCurrentSpeech, pitch, rate } = opts;
+  let {
+    text,
+    lng,
+    volume,
+    voiceName,
+    stopCurrentSpeech,
+    pitch,
+    rate,
+    forceGoogleMinRate,
+    forceGoogleMaxRate,
+  } = opts;
 
   if (volume && (volume > 100 || volume < 0)) {
     console.warn("Volume must be between 0 and 100");
@@ -92,8 +118,19 @@ export function speak(opts: ISpeak) {
     pitch = 1;
   }
   if (rate && (rate > 10 || rate < 0.1)) {
-    console.warn("Pitch must be between 0 and 2");
+    console.warn("Rate must be between 0.1 and 10");
     rate = 1;
+  }
+
+  if (
+    forceGoogleMaxRate &&
+    forceGoogleMinRate &&
+    forceGoogleMaxRate < forceGoogleMinRate
+  ) {
+    console.error(
+      "forceGoogleMinRate can't be set to higher value than forceGoogleMaxRate"
+    );
+    return;
   }
 
   let voices = listVoices(lng).filteredVoices;
@@ -111,7 +148,14 @@ export function speak(opts: ISpeak) {
       rate,
     });
   } else {
-    speakGoogleTTS({ text, lng, volume });
+    if (rate) {
+      if (forceGoogleMinRate && rate < forceGoogleMinRate)
+        rate = forceGoogleMinRate;
+      else if (forceGoogleMaxRate && rate > forceGoogleMaxRate)
+        rate = forceGoogleMaxRate;
+    }
+
+    speakGoogleTTS({ text, lng, volume, rate });
   }
 }
 // endregion: --- Main speak
@@ -192,6 +236,7 @@ export function listVoices(lng?: string) {
 export function checkSpeechSynthesisCompatibility(lng?: string): boolean {
   return listVoices(lng).filteredVoices.length > 1;
 }
+export { checkSpeechSynthesisCompatibility as isSpeechSynthesisCompatible };
 
 // endregion: --- SpeechSynthesis
 
@@ -201,10 +246,11 @@ export interface IGoogleTTS {
   text: string;
   lng: string;
   volume: number;
+  rate?: number;
 }
 
 export function speakGoogleTTS(opts: IGoogleTTS) {
-  const { lng, text, volume } = opts;
+  const { lng, text, volume, rate } = opts;
 
   let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
 
@@ -224,6 +270,7 @@ export function speakGoogleTTS(opts: IGoogleTTS) {
 
   audioEl.src = url;
   audioEl.volume = volume / 100;
+  audioEl.playbackRate = rate || 1;
 
   audioEl.play();
 }

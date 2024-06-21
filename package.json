@@ -1,6 +1,6 @@
 {
   "name": "easy-tts",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Lightweight TTS library for browsers.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",

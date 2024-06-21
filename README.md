@@ -26,12 +26,12 @@ speak({
 ### Advenced
 
 ```ts
-import { speak, listWords } from "easy-tts"
+import { speak, GoogleVoiceName } from "easy-tts"
 
 speak({
   lng: "en",
   text: "Hey, hear my beautiful voice!",
-  voiceName: "Voice Google", // sets voice of Google Translate (it's default anyway)
+  voiceName: GoogleVoiceName, // sets voice of Google Translate (it's default anyway)
   volume: 75,
   stopCurrentSpeech: false,
   pitch: 1.5,

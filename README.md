@@ -23,6 +23,24 @@ speak({
 });
 ```
 
+### Advenced
+
+```ts
+import { speak, listWords } from "easy-tts"
+
+speak({
+  lng: "en",
+  text: "Hey, hear my beautiful voice!",
+  voiceName: "Voice Google", // sets voice of Google Translate (it's default anyway)
+  volume: 75,
+  stopCurrentSpeech: false,
+  pitch: 1.5,
+  rate: 2, // 2x speed of voice
+  forceGoogleMinRate: 0.5,
+  forceGoogleMaxRate: 5
+});
+```
+
 ### Google TTS
 
 ```ts
@@ -71,3 +89,4 @@ cancelSpeech()
 - [x] Fn resume
 - [ ] Fn isSpeaking
 - [x] Pitch option
+- [ ] Async

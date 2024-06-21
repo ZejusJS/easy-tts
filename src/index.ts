@@ -16,26 +16,26 @@ export interface ISpeak {
    * */
   lng: string;
   /**
-   * Value ranges between 0 and 100.
+   * Value ranges **between 0 and 100**.
    *
-   * If 0, TTS will not start at all.
+   * If `0`, TTS will not start at all.
    */
   volume: number;
   /**
-   * Voice name for TTS.
+   * Voice name of TTS.
    *
-   * Available voice names can be find by provided function listVoices().
+   * Available voice names can be find by provided function `listVoices()`.
    *
-   * For Google TTS, set "Google Voice" as voiceName.
+   * For Google TTS, set "Google Voice" as `voiceName`.
    *
-   * If voiceName isn't provided, the first available
-   * voice on a device will be selected.
+   * **If `voiceName` isn't provided, the first available
+   * voice on a device will be selected.**
    */
   voiceName?: string;
   /**
    * Stops current speech and starts a new one.
    *
-   * Google TTS ( {voiceName: "Google Voice"} ) is
+   * Google TTS ( `{voiceName: "Google Voice"}` ) is
    * always cancelled
    *
    * @default true
@@ -50,7 +50,7 @@ export interface ISpeak {
    * For example Microsoft voices with "(natural)"
    * in their name.
    *
-   * Ranges between 0 - 2.
+   * **Ranges between 0 - 2.**
    *
    * @default 1
    */
@@ -58,56 +58,56 @@ export interface ISpeak {
   /**
    * Speed of voice
    *
-   * For "Google Voice" as voiceName, it's recommended
+   * For "Google Voice" as `voiceName`, it's recommended
    * to use a value of 0.6 as a minimum and 5 as maximum. You can
    * force any minimum for "Google Voice" by setting forceGoogleMinRate.
    *
-   * Ranges between 0.1 and 10.
+   * **Ranges between 0.1 and 10.**
    *
    * @default 1
    */
   rate?: number;
   /**
    * Sets the minimum posible rate for "Google Voice"
-   * as voiceName. It's recommended to set 0.6.
+   * as `voiceName`. It's recommended to set 0.6.
    *
-   * Ranges between 0.1 and 10.
+   * **Ranges between 0.1 and 10.**
    */
   forceGoogleMinRate?: number;
   /**
    * Sets the maximum posible rate for "Google Voice"
-   * as voiceName. It's recommended to set 6.
+   * as `voiceName`. It's recommended to set 7.
    *
-   * Ranges between 0.1 and 10.
+   * **Ranges between 0.1 and 10.**
    */
   forceGoogleMaxRate?: number;
 }
 
 /**
  * There are two types of TTS which this function can play.
- * - If you set opts.voiceName to "Google Voice" or some invalid value,
+ * - If you set `opts.voiceName` to "Google Voice" or some invalid value,
  * the function will set URL for requesting Google translate API that returns playable
  * sound file to hidden audio player and play it.
- * - If you set valid voice name to opts.voiceName, the TTS will be played
+ * - If you set valid voice name to `opts.voiceName`, the TTS will be played
  * from {@link https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis Web Speech API}.
  *
- * Valid voice names can be retrieved by listVoices() function.
+ * Valid voice names can be retrieved by `listVoices()` function.
  *
  * @param {ISpeak} opts Options for TTS
  *
  */
-export function speak(opts: ISpeak) {
-  let {
-    text,
-    lng,
-    volume,
-    voiceName,
-    stopCurrentSpeech,
-    pitch,
-    rate,
-    forceGoogleMinRate,
-    forceGoogleMaxRate,
-  } = opts;
+export function speak({
+  text,
+  lng,
+  volume,
+  voiceName,
+  stopCurrentSpeech = true,
+  pitch = 1,
+  rate = 1,
+  forceGoogleMinRate,
+  forceGoogleMaxRate,
+}: ISpeak) {
+  if (!volume) return;
 
   if (volume && (volume > 100 || volume < 0)) {
     console.warn("Volume must be between 0 and 100");
@@ -121,6 +121,9 @@ export function speak(opts: ISpeak) {
     console.warn("Rate must be between 0.1 and 10");
     rate = 1;
   }
+  if (typeof stopCurrentSpeech !== "boolean") {
+    stopCurrentSpeech = true;
+  }
 
   if (
     forceGoogleMaxRate &&
@@ -133,29 +136,27 @@ export function speak(opts: ISpeak) {
     return;
   }
 
-  let voices = listVoices(lng).filteredVoices;
+  let filteredVoices = listVoices(lng).filteredVoices;
 
-  const selectedVoice = voices.find((v) => v.name === voiceName);
+  const selectedVoice =
+    filteredVoices.find((v) => v.name === voiceName) || filteredVoices[0];
 
-  if ((selectedVoice || voices[0]) && voiceName !== GoogleVoiceName) {
+  if (selectedVoice && selectedVoice.name !== GoogleVoiceName && voiceName !== GoogleVoiceName) {
     speakSpeechSynthesisUtterance({
       text,
       volume,
-      voices,
       selectedVoice,
       stopCurrentSpeech,
       pitch,
       rate,
     });
   } else {
-    if (rate) {
-      if (forceGoogleMinRate && rate < forceGoogleMinRate)
-        rate = forceGoogleMinRate;
-      else if (forceGoogleMaxRate && rate > forceGoogleMaxRate)
-        rate = forceGoogleMaxRate;
-    }
+    if (forceGoogleMinRate && rate < forceGoogleMinRate)
+      rate = forceGoogleMinRate;
+    else if (forceGoogleMaxRate && rate > forceGoogleMaxRate)
+      rate = forceGoogleMaxRate;
 
-    speakGoogleTTS({ text, lng, volume, rate });
+    speakGoogleTTS({ text, lng, volume, rate, stopCurrentSpeech });
   }
 }
 // endregion: --- Main speak
@@ -165,35 +166,31 @@ export function speak(opts: ISpeak) {
 export interface ISpeakSynthesis {
   text: string;
   volume: number;
-  voices: SpeechSynthesisVoice[];
-  selectedVoice?: SpeechSynthesisVoice;
-  stopCurrentSpeech?: boolean;
-  pitch?: number;
-  rate?: number;
+  selectedVoice: SpeechSynthesisVoice;
+  stopCurrentSpeech: boolean;
+  pitch: number;
+  rate: number;
 }
 
-export function speakSpeechSynthesisUtterance(opts: ISpeakSynthesis) {
-  const {
-    text,
-    voices,
-    volume,
-    selectedVoice,
-    stopCurrentSpeech,
-    pitch,
-    rate,
-  } = opts;
-
+function speakSpeechSynthesisUtterance({
+  text,
+  volume,
+  selectedVoice,
+  stopCurrentSpeech,
+  pitch,
+  rate,
+}: ISpeakSynthesis) {
   if (stopCurrentSpeech) {
-    window.speechSynthesis.cancel();
+    stopSpeech();
   }
 
   const utterance = new SpeechSynthesisUtterance(text);
 
-  utterance.voice = selectedVoice ? selectedVoice : voices[0]; // Choose a specific voice
+  utterance.voice = selectedVoice; // Choose a specific voice
   utterance.volume = volume / 100;
   utterance.lang = utterance.voice.lang;
-  utterance.pitch = pitch || 1;
-  utterance.rate = rate || 1;
+  utterance.pitch = pitch;
+  utterance.rate = rate;
 
   speechSynthesis.speak(utterance);
 }
@@ -205,10 +202,10 @@ export function speakSpeechSynthesisUtterance(opts: ISpeakSynthesis) {
  * @param lng Can be set to the first letters (before "-") of any {@link https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1 BCP 47} language (e.g. "en" or "EN").
  *
  * @returns
- * @returns {SpeechSynthesisVoice[]} return.filteredVoices - The list of voices filtered by the specified language tag, if provided.
- * @returns {SpeechSynthesisVoice[]} return.voices - The complete list of available voices in the browser.
- * @returns {string[]} return.filteredVoicesNames - The names of the filtered voices, with "Google Voice" appended.
- * @returns {string[]} return.voiceNames - The names of all available voices, with "Google Voice" appended.
+ * @returns {SpeechSynthesisVoice[]} `return.filteredVoices` - The list of Speech Synthesis voices filtered by the specified language tag, if provided.
+ * @returns {SpeechSynthesisVoice[]} `return.voices` - The complete list of available Speech Synthesis voices in the browser.
+ * @returns {string[]} `return.filteredVoicesNames` - The names of the filtered voices, with "Google Voice" appended.
+ * @returns {string[]} `return.voiceNames` - The names of all available voices, with "Google Voice" appended.
  */
 export function listVoices(lng?: string) {
   const voices = speechSynthesis.getVoices();
@@ -246,11 +243,20 @@ export interface IGoogleTTS {
   text: string;
   lng: string;
   volume: number;
-  rate?: number;
+  rate: number;
+  stopCurrentSpeech: boolean;
 }
 
-export function speakGoogleTTS(opts: IGoogleTTS) {
-  const { lng, text, volume, rate } = opts;
+function speakGoogleTTS({
+  lng,
+  text,
+  volume,
+  rate,
+  stopCurrentSpeech,
+}: IGoogleTTS) {
+  if (stopCurrentSpeech) {
+    stopSpeech();
+  }
 
   let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
 
@@ -270,7 +276,7 @@ export function speakGoogleTTS(opts: IGoogleTTS) {
 
   audioEl.src = url;
   audioEl.volume = volume / 100;
-  audioEl.playbackRate = rate || 1;
+  audioEl.playbackRate = rate;
 
   audioEl.play();
 }

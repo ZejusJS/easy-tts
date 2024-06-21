@@ -4,6 +4,11 @@ This package is meant to lighten the work around TTS in browsers. It's compatibl
 
 For now it provides basic configuration, but it will be updated.
 
+## Installation
+```bash
+npm i easy-tts
+```
+
 ## Usage
 
 ### Basic

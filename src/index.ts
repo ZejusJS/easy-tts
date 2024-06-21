@@ -59,7 +59,7 @@ export interface ISpeak {
    * Speed of voice
    *
    * For "Google Voice" as `voiceName`, it's recommended
-   * to use a value of 0.6 as a minimum and 5 as maximum. You can
+   * to use a value of 0.6 as a minimum and 5 as a maximum. You can
    * force any minimum for "Google Voice" by setting forceGoogleMinRate.
    *
    * **Ranges between 0.1 and 10.**
@@ -141,7 +141,11 @@ export function speak({
   const selectedVoice =
     filteredVoices.find((v) => v.name === voiceName) || filteredVoices[0];
 
-  if (selectedVoice && selectedVoice.name !== GoogleVoiceName && voiceName !== GoogleVoiceName) {
+  if (
+    selectedVoice &&
+    selectedVoice.name !== GoogleVoiceName &&
+    voiceName !== GoogleVoiceName
+  ) {
     speakSpeechSynthesisUtterance({
       text,
       volume,
@@ -195,19 +199,35 @@ function speakSpeechSynthesisUtterance({
   speechSynthesis.speak(utterance);
 }
 
+export interface IListVoicesReturn {
+  /**
+   * The list of Speech Synthesis voices filtered
+   * by the specified language tag, if provided.
+   */
+  filteredVoices: SpeechSynthesisVoice[];
+  /**
+   * The complete list of available
+   * Speech Synthesis voices in the browser.
+   */
+  voices: SpeechSynthesisVoice[];
+  /**
+   * The names of the filtered voices,
+   * with "Google Voice" appended.
+   */
+  filteredVoicesNames: string[];
+  /**
+   * The names of all available voices,
+   * with "Google Voice" appended.
+   */
+  voiceNames: string[];
+}
+
 /**
- * This lists every available voice in current browser
+ * Lists every available voice in current browser.
  *
- *
- * @param lng Can be set to the first letters (before "-") of any {@link https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1 BCP 47} language (e.g. "en" or "EN").
- *
- * @returns
- * @returns {SpeechSynthesisVoice[]} `return.filteredVoices` - The list of Speech Synthesis voices filtered by the specified language tag, if provided.
- * @returns {SpeechSynthesisVoice[]} `return.voices` - The complete list of available Speech Synthesis voices in the browser.
- * @returns {string[]} `return.filteredVoicesNames` - The names of the filtered voices, with "Google Voice" appended.
- * @returns {string[]} `return.voiceNames` - The names of all available voices, with "Google Voice" appended.
+ * @param lng Can be set to the first letters (before "-") of any {@link https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1 BCP 47} language (e.g. "en" or "EN") for filtered results.
  */
-export function listVoices(lng?: string) {
+export function listVoices(lng?: string): IListVoicesReturn {
   const voices = speechSynthesis.getVoices();
 
   const filteredVoices = lng?.length
@@ -227,7 +247,7 @@ export function listVoices(lng?: string) {
     voices,
     filteredVoicesNames,
     voiceNames,
-  };
+  } satisfies IListVoicesReturn;
 }
 
 export function checkSpeechSynthesisCompatibility(lng?: string): boolean {

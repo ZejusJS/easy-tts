@@ -56,7 +56,8 @@ export interface ISpeak {
    */
   pitch?: number;
   /**
-   * Speed if voice-
+   * Speed of voice
+   * 
    * Works only for Speech Synthesis API (not for "Google Voice").
    *
    * Ranges between 0.1 and 10.

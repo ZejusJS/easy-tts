@@ -43,6 +43,18 @@ checkSpeechSynthesisCompatibility()
 checkSpeechSynthesisCompatibility("en")
 ```
 
+### Pause, resume and cancel speech
+```ts
+import { cancelSpeech, resumeSpeech, pauseSpeech, speak } from "easy-tts";
+
+speak({...})
+pauseSpeech()
+resumeSpeech()
+
+speak({...})
+cancelSpeech()
+```
+
 ## Examples
 
 ## TODOS

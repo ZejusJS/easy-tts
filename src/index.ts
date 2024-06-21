@@ -237,7 +237,10 @@ export function speakGoogleTTS(opts: IGoogleTTS) {
 export function stopSpeech() {
   let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
 
-  if (audioEl) audioEl.pause();
+  if (audioEl) {
+    audioEl.pause();
+    audioEl.src = "";
+  }
   window.speechSynthesis.cancel();
 }
 export { stopSpeech as cancelSpeech };

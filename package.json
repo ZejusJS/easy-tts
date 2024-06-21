@@ -1,6 +1,6 @@
 {
   "name": "easy-tts",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Lightweight TTS library for browsers.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -21,7 +21,7 @@
   "devDependencies": {
     "ts-node": "^10.9.2",
     "tsup": "^8.1.0",
-    "typescript": "^5.4.5"
+    "typescript": "^5.5.2"
   },
   "repository": {
     "type": "git",

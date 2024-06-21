@@ -49,7 +49,8 @@ checkSpeechSynthesisCompatibility("en")
 
 - [x] Appending hidden audio element
 - [ ] Provide example of user's choice of TTS voice
-- [ ] Fn stop
-- [ ] Fn pause
-- [ ] Fn resume
-- [ ] Pitch option
+- [x] Fn stop
+- [x] Fn pause
+- [x] Fn resume
+- [ ] Fn isSpeaking
+- [x] Pitch option

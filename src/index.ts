@@ -6,12 +6,19 @@ export const AudioElementId = "easy-tts-audio" as const;
 export interface ISpeak {
   /** Text for TTS */
   text: string;
-  /** Spoken language by TTS */
+  /**
+   * Spoken language by TTS
+   *
+   * Must be set to the first letters (before "-") of any
+   * {@link https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1 BCP 47} language
+   * (e.g. "en" or "EN").
+   *
+   * */
   lng: string;
   /**
-   * Value from 0 - 100.
+   * Value ranges between 0 and 100.
    *
-   * If 0, TTS will not start.
+   * If 0, TTS will not start at all.
    */
   volume: number;
   /**
@@ -20,6 +27,9 @@ export interface ISpeak {
    * Available voice names can be find by provided function listVoices().
    *
    * For Google TTS, set "Google Voice" as voiceName.
+   *
+   * If voiceName isn't provided, the first available
+   * voice on a device will be selected.
    */
   voiceName?: string;
   /**
@@ -31,6 +41,29 @@ export interface ISpeak {
    * @default true
    */
   stopCurrentSpeech?: boolean;
+  /**
+   * Pitch of the voice.
+   * Works only for Speech Synthesis API (not for "Google Voice").
+   *
+   *
+   * Some voices don't support pitch.
+   * For example Microsoft voices with "(natural)"
+   * in their name.
+   *
+   * Ranges between 0 - 2.
+   *
+   * @default 1
+   */
+  pitch?: number;
+  /**
+   * Speed if voice-
+   * Works only for Speech Synthesis API (not for "Google Voice").
+   *
+   * Ranges between 0.1 and 10.
+   *
+   * @default 1
+   */
+  rate?: number;
 }
 
 /**
@@ -47,9 +80,20 @@ export interface ISpeak {
  *
  */
 export function speak(opts: ISpeak) {
-  const { text, lng, volume, voiceName, stopCurrentSpeech } = opts;
+  let { text, lng, volume, voiceName, stopCurrentSpeech, pitch, rate } = opts;
 
-  if (!volume || volume > 100 || volume < 0) return;
+  if (volume && (volume > 100 || volume < 0)) {
+    console.warn("Volume must be between 0 and 100");
+    volume = 100;
+  }
+  if (pitch && (pitch > 2 || pitch < 0)) {
+    console.warn("Pitch must be between 0 and 2");
+    pitch = 1;
+  }
+  if (rate && (rate > 10 || rate < 0.1)) {
+    console.warn("Pitch must be between 0 and 2");
+    rate = 1;
+  }
 
   let voices = listVoices(lng).filteredVoices;
 
@@ -62,6 +106,8 @@ export function speak(opts: ISpeak) {
       voices,
       selectedVoice,
       stopCurrentSpeech,
+      pitch,
+      rate,
     });
   } else {
     speakGoogleTTS({ text, lng, volume });
@@ -77,10 +123,20 @@ export interface ISpeakSynthesis {
   voices: SpeechSynthesisVoice[];
   selectedVoice?: SpeechSynthesisVoice;
   stopCurrentSpeech?: boolean;
+  pitch?: number;
+  rate?: number;
 }
 
 export function speakSpeechSynthesisUtterance(opts: ISpeakSynthesis) {
-  const { text, voices, volume, selectedVoice, stopCurrentSpeech } = opts;
+  const {
+    text,
+    voices,
+    volume,
+    selectedVoice,
+    stopCurrentSpeech,
+    pitch,
+    rate,
+  } = opts;
 
   if (stopCurrentSpeech) {
     window.speechSynthesis.cancel();
@@ -91,6 +147,8 @@ export function speakSpeechSynthesisUtterance(opts: ISpeakSynthesis) {
   utterance.voice = selectedVoice ? selectedVoice : voices[0]; // Choose a specific voice
   utterance.volume = volume / 100;
   utterance.lang = utterance.voice.lang;
+  utterance.pitch = pitch || 1;
+  utterance.rate = rate || 1;
 
   speechSynthesis.speak(utterance);
 }
@@ -99,7 +157,7 @@ export function speakSpeechSynthesisUtterance(opts: ISpeakSynthesis) {
  * This lists every available voice in current browser
  *
  *
- * @param lng Can be set to first two letters of any {@link https://www.techonthenet.com/js/language_tags.php BCP 47} language
+ * @param lng Can be set to the first letters (before "-") of any {@link https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1 BCP 47} language (e.g. "en" or "EN").
  *
  * @returns
  * @returns {SpeechSynthesisVoice[]} return.filteredVoices - The list of voices filtered by the specified language tag, if provided.
@@ -159,7 +217,7 @@ export function speakGoogleTTS(opts: IGoogleTTS) {
     audioEl = newAudioEl;
   }
 
-  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lng}&client=tw-ob&q="${text}"`;
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lng.toLowerCase()}&client=tw-ob&q="${text}"`;
 
   audioEl.pause();
 
@@ -170,3 +228,38 @@ export function speakGoogleTTS(opts: IGoogleTTS) {
 }
 
 // endregion: --- Google TTS
+
+// region:    --- Misc fns
+
+/**
+ * Cancel current TTS
+ */
+export function stopSpeech() {
+  let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
+
+  if (audioEl) audioEl.pause();
+  window.speechSynthesis.cancel();
+}
+export { stopSpeech as cancelSpeech };
+
+/**
+ * Pause current TTS
+ */
+export function pauseSpeech() {
+  let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
+
+  if (audioEl) audioEl.pause();
+  speechSynthesis.pause();
+}
+
+/**
+ * Resume current TTS
+ */
+export function resumeSpeech() {
+  let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
+
+  if (audioEl) audioEl.play();
+  speechSynthesis.resume();
+}
+
+// endregion: --- Misc fns

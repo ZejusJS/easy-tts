@@ -37,7 +37,7 @@ export async function speakSpeechSynthesisUtterance({
 
 function speakUtterance(utterance: SpeechSynthesisUtterance) {
   return new Promise((res) => {
-    speechSynthesis.speak(utterance);
+    window.speechSynthesis.speak(utterance);
     utterance.onend = res;
   });
 }
@@ -71,7 +71,7 @@ export interface IListVoicesReturn {
  * @param lng Can be set to the first letters (before "-") of any {@link https://gist.github.com/typpo/b2b828a35e683b9bf8db91b5404f1bd1 BCP 47} language (e.g. "en" or "EN") for filtered results.
  */
 export function listVoices(lng?: string): IListVoicesReturn {
-  const voices = speechSynthesis.getVoices();
+  const voices = window.speechSynthesis.getVoices();
 
   const filteredVoices = lng?.length
     ? voices.filter(

@@ -23,7 +23,7 @@ export function pauseSpeech() {
   let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
 
   if (audioEl) audioEl.pause();
-  speechSynthesis.pause();
+  window.speechSynthesis.pause();
 }
 
 /**
@@ -33,7 +33,13 @@ export function resumeSpeech() {
   let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
 
   if (audioEl) audioEl.play();
-  speechSynthesis.resume();
+  window.speechSynthesis.resume();
+}
+
+export function isSpeaking(): boolean {
+  let audioEl = document.getElementById(AudioElementId) as HTMLAudioElement;
+
+  return (audioEl && !audioEl.paused) || window.speechSynthesis.speaking;
 }
 
 // endregion: --- Misc fns

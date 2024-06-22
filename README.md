@@ -1,8 +1,9 @@
-# easy-tts (not ready yet)
+# easy-tts
 
 This package is meant to lighten the work around TTS in browsers. It's compatible for every browser because it calls Google Translate API as backup speech.
 
-For now it provides basic configuration, but it will be updated.
+> 🟧 **Warning**
+> The package works, but expect further updates with API changes.
 
 ## Installation
 ```bash
@@ -15,7 +16,7 @@ npm i easy-tts
 ```ts
 import { speak, listWords } from "easy-tts"
 
-speak({
+await speak({
   lng: "en",
   text: "Hey, hear my beautiful voice!",
   voiceName: listWords("EN").filteredVoiceNames[0],
@@ -83,10 +84,10 @@ cancelSpeech()
 ## TODOS
 
 - [x] Appending hidden audio element
-- [ ] Provide example of user's choice of TTS voice
+- [ ] Provide an example of user's choice of TTS voice
 - [x] Fn stop
 - [x] Fn pause
 - [x] Fn resume
-- [ ] Fn isSpeaking
+- [x] Fn isSpeaking
 - [x] Pitch option
-- [ ] Async
+- [x] Async

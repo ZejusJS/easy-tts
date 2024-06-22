@@ -45,12 +45,12 @@ await speak({
 ### Google TTS
 
 ```ts
-import { speak, listWords } from "easy-tts"
+import { speak, listWords, GoogleVoiceName } from "easy-tts"
 
 await speak({
   lng: "en",
   text: "Hey, hear my beautiful voice!",
-  voiceName: "Google Voice",
+  voiceName: GoogleVoiceName,
   volume: 75,
 });
 ```

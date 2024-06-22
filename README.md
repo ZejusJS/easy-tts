@@ -18,7 +18,7 @@ import { speak, listWords } from "easy-tts"
 speak({
   lng: "en",
   text: "Hey, hear my beautiful voice!",
-  voiceName: listWords("EN").filteredVoicesNames[0],
+  voiceName: listWords("EN").filteredVoiceNames[0],
   volume: 75,
 });
 ```
@@ -28,10 +28,10 @@ speak({
 ```ts
 import { speak, GoogleVoiceName } from "easy-tts"
 
-speak({
+await speak({
   lng: "en",
   text: "Hey, hear my beautiful voice!",
-  voiceName: GoogleVoiceName, // sets voice of Google Translate (it's default anyway)
+  voiceName: GoogleVoiceName, // sets the voice of Google Translate
   volume: 75,
   stopCurrentSpeech: false,
   pitch: 1.5,
@@ -46,7 +46,7 @@ speak({
 ```ts
 import { speak, listWords } from "easy-tts"
 
-speak({
+await speak({
   lng: "en",
   text: "Hey, hear my beautiful voice!",
   voiceName: "Google Voice",
